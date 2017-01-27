@@ -4,6 +4,9 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WOElement;
@@ -20,12 +23,13 @@ import er.extensions.foundation.ERXValueUtilities;
 
 // PROTOTYPE FUNCTIONS (WRAPPER)
 /**
- * Autocompleting combo-box similar to Google suggest.<br/>
- * 
+ * Autocompleting combo-box similar to Google suggest.
+ * <p>
  * This is a component that look like a text field, where when you start
  * entering value, it start giving you a menu of options related to what you
  * type. Think about the auto-completion feature of many IDE (XCode / Eclipse)
- * inside a textField.<br/> <br/> 
+ * inside a textField.
+ * <p>
  * The scriptaculous library has 2 version of the autocompleter combo-box : 
  * a local version and an ajax version.
  * 
@@ -33,7 +37,7 @@ import er.extensions.foundation.ERXValueUtilities;
  * The local version hold the list of values all in memory (client-side), there
  * is no interaction. If the number of elements is big enough to be in a
  * WOPopUP, then this variant is well suited for you. If the list of element to
- * show is too big, then you might prefer the 'ajax' version.<br/> You have to
+ * show is too big, then you might prefer the 'ajax' version.<br> You have to
  * tell the component that it is local (by default it is 'ajax' type) using the
  * <code>isLocal</code> binding. Then the <code>list</code> binding will
  * need to provide all the objects needed to be found. Filtering of the list as
@@ -92,6 +96,8 @@ import er.extensions.foundation.ERXValueUtilities;
  * @author ak
  */
 public class AjaxAutoComplete extends AjaxComponent {
+	private static final Logger log = LoggerFactory.getLogger(AjaxAutoComplete.class);
+
 	/**
 	 * Do I need to update serialVersionUID?
 	 * See section 5.6 <cite>Type Changes Affecting Serialization</cite> on page 51 of the 
@@ -143,7 +149,7 @@ public class AjaxAutoComplete extends AjaxComponent {
     }
     
     protected NSDictionary createAjaxOptions() {
-      NSMutableArray ajaxOptionsArray = new NSMutableArray();
+      NSMutableArray<AjaxOption> ajaxOptionsArray = new NSMutableArray<>();
       ajaxOptionsArray.addObject(new AjaxOption("tokens", AjaxOption.STRING_ARRAY));
       ajaxOptionsArray.addObject(new AjaxOption("frequency", AjaxOption.NUMBER));
       ajaxOptionsArray.addObject(new AjaxOption("minChars", AjaxOption.NUMBER));
@@ -160,8 +166,7 @@ public class AjaxAutoComplete extends AjaxComponent {
       ajaxOptionsArray.addObject(new AjaxOption("partialChars", AjaxOption.NUMBER));
       ajaxOptionsArray.addObject(new AjaxOption("ignoreCase", AjaxOption.BOOLEAN));
       ajaxOptionsArray.addObject(new AjaxOption("activateOnFocus", AjaxOption.BOOLEAN));
-      NSMutableDictionary options = AjaxOption.createAjaxOptionsDictionary(ajaxOptionsArray, this);
-      return options;
+      return AjaxOption.createAjaxOptionsDictionary(ajaxOptionsArray, this);
     }
    
     /**
@@ -174,7 +179,7 @@ public class AjaxAutoComplete extends AjaxComponent {
 		if ( !isDisabled ) {
 			boolean isLocal = hasBinding("isLocal") && ((Boolean) valueForBinding("isLocal")).booleanValue();
 			if (isLocal) {
-				StringBuffer str = new StringBuffer();
+				StringBuilder str = new StringBuilder();
 				boolean isLocalSharedList = hasBinding("isLocalSharedList") && ((Boolean) valueForBinding("isLocalSharedList")).booleanValue();
 				String listJS = null;
 				if (isLocalSharedList) {
@@ -351,6 +356,15 @@ public class AjaxAutoComplete extends AjaxComponent {
 	        for(Iterator iter = ((List)values).iterator(); iter.hasNext() && itemsCount++ < maxItems;) {
 	        	appendItemToResponse(iter.next(), child, hasItem, response, context);
 	        }
+        }
+        else if (values instanceof Object[]) {
+            Object[] array = (Object[]) values;
+            for (int i = 0; i < array.length && i < maxItems; i++) {
+                appendItemToResponse(array[i], child, hasItem, response, context);
+            }
+        }
+        else if (values != null) {
+            log.warn("Unsupported class type for list: {}", values.getClass().getCanonicalName());
         }
         response.appendContentString("</ul>");
         return response;

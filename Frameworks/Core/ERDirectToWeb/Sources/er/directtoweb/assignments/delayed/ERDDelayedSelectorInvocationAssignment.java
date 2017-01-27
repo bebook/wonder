@@ -20,7 +20,7 @@ import er.extensions.foundation.ERXSelectorUtilities;
  * Similar in nature to a key-value assignment, but allows you to construct arbitrary method invocations to
  * resolve rules.  As a somewhat contrived example, assume we're inferring on the componentName rule:
  * <P>
- * <code>entity.name = 'Person' and propertyKey = 'username' -> componentName = (object, componentForKey, propertyKey)</code>
+ * <code>entity.name = 'Person' and propertyKey = 'username' -&gt; componentName = (object, componentForKey, propertyKey)</code>
  *
  * <P>
  *
@@ -148,7 +148,7 @@ public class ERDDelayedSelectorInvocationAssignment extends ERDDelayedAssignment
                 }
 
                 if ( _log.isDebugEnabled() ) {
-                    final StringBuilder sb = new StringBuilder('(');
+                    final StringBuilder sb = new StringBuilder("(");
 
                     if ( arguments != null ) {
                         for ( int i = 0; i < arguments.length; i++ ) {

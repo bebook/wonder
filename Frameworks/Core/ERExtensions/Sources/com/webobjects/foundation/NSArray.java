@@ -15,21 +15,24 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Vector;
 
+import er.extensions.eof.ERXKey;
+import er.extensions.foundation.ERXArrayUtilities;
+
 /**
- * <span class="en">
+ * <div class="en">
  * NSArray re-implementation to support JDK 1.5 templates. Use with
- * </span>
+ * </div>
  * 
- * <span class="ja">
+ * <div class="ja">
  * JDK 1.5 テンプレートをサポートする為の再実装。使用は
- * </span>
+ * </div>
  * 
- * <pre>
- * NSArray<Bug> bugs = ds.fetchObjects();
+ * <pre><code>
+ * NSArray&lt;Bug&gt; bugs = ds.fetchObjects();
  * 
  * for(Bug : bugs) {
  * 	  ...
- * }</pre>
+ * }</code></pre>
  *
  * @param <E> - type of array contents
  */
@@ -169,7 +172,7 @@ public class NSArray<E> implements Cloneable, Serializable, NSCoding, NSKeyValue
 	public static final String SumOperatorName = "sum";
 	public static final String AverageOperatorName = "avg";
 	private static final String SerializationValuesFieldKey = "objects";
-	private static NSMutableDictionary<String, Operator> _operators = new NSMutableDictionary<String, Operator>(8);
+	private static NSMutableDictionary<String, Operator> _operators = new NSMutableDictionary<>(8);
 	protected static final int _NSArrayClassHashCode = _CLASS.hashCode();
 	protected Object[] _objects;
 	protected transient int _hashCache;
@@ -322,18 +325,14 @@ public class NSArray<E> implements Cloneable, Serializable, NSCoding, NSKeyValue
 
 	public NSArray(List<? extends E> list, boolean checkForNull) {
 		if (list == null) {
-			throw new NullPointerException("List cannot be null");
+			initFromObjects(null, 0, 0, false, false);
+		} else {
+			initFromList(list, 0, list.size(), 0, checkForNull, false);
 		}
-		initFromList(list, 0, list.size(), 0, checkForNull, false);
 	}
 
 	public NSArray(Collection<? extends E> collection, boolean checkForNull) {
-		if (collection == null) {
-			throw new NullPointerException("Collection cannot be null");
-		}
-		
-		Object[] anArray = collection.toArray();
-		initFromObjects(anArray, 0, anArray.length, checkForNull, false);
+		initFromObjects(collection == null ? null : collection.toArray(), 0, collection == null ? 0 : collection.size(), checkForNull, false);
 	}
 
 	public NSArray(Collection<? extends E> collection) {
@@ -661,7 +660,7 @@ public class NSArray<E> implements Cloneable, Serializable, NSCoding, NSKeyValue
 		int stringLength = string.length();
 
 		if ((separator == null) || (separator.length() == 0)) {
-			return new NSArray<String>(string);
+			return new NSArray<>(string);
 		}
 		int separatorLength = separator.length();
 
@@ -678,10 +677,10 @@ public class NSArray<E> implements Cloneable, Serializable, NSCoding, NSKeyValue
 			}
 
 			if (count == 0) {
-				return new NSArray<String>(string);
+				return new NSArray<>(string);
 			}
 
-			objects = new NSMutableArray<String>(count + 1);
+			objects = new NSMutableArray<>(count + 1);
 			int end = stringLength - 1;
 			for (index = 0; index <= end; ++index) {
 				if (parseData[index] == charSeparator) {
@@ -699,7 +698,7 @@ public class NSArray<E> implements Cloneable, Serializable, NSCoding, NSKeyValue
 				objects.addObject(string.substring(start, stringLength));
 			}
 		} else {
-			objects = new NSMutableArray<String>(4);
+			objects = new NSMutableArray<>(4);
 			int end = stringLength - separatorLength;
 			while (true) { 
 				if (start >= stringLength) {
@@ -759,7 +758,7 @@ public class NSArray<E> implements Cloneable, Serializable, NSCoding, NSKeyValue
 			}
 		}
 		Object[] objects = objectsNoCopy();
-		NSMutableArray<Object> values = new NSMutableArray<Object>(objects.length);
+		NSMutableArray<Object> values = new NSMutableArray<>(objects.length);
 		for (int i = 0; i < objects.length; i++) {
 			Object value = NSKeyValueCodingAdditions.Utility.valueForKeyPath(objects[i], key);
 			values.addObject(value == null ? ((Object) (NSKeyValueCoding.NullValue)) : value);
@@ -1074,5 +1073,106 @@ public class NSArray<E> implements Cloneable, Serializable, NSCoding, NSKeyValue
 			}
 			throw NSForwardException._runtimeExceptionForThrowable(e);
 		}
+	}
+	
+	/**
+	 * A type-safe wrapper for {@link #valueForKeyPath(String)} that simply
+	 * calls {@code valueForKeyPath(erxKey.key())} and attempts to cast the
+	 * result to {@code NSArray<T>}. If the value returned cannot be cast it
+	 * will throw a {@link ClassCastException}.
+	 * 
+	 * @param <T>
+	 *            the Type of elements in the returned {@code NSArray}
+	 * @param erxKey
+	 * @return an {@code NSArray} of {@code T} objects.
+	 * @author David Avendasora
+	 */
+	public <T> NSArray<T> valueForKeyPath(ERXKey<T> erxKey) {
+		return (NSArray<T>) valueForKeyPath(erxKey.key());
+	}
+
+	/**
+	 * A type-safe wrapper for {@link #valueForKey(String)} that automatically
+	 * does the following (in order) to the resulting array prior to returning
+	 * it:
+	 * <ol>
+	 * <li>{@link ERXArrayUtilities#removeNullValues(NSArray) remove}
+	 * {@code NSKeyValueCoding.Null} elements</li>
+	 * <li>{@link ERXArrayUtilities#flatten(NSArray) flatten} all elements that
+	 * are arrays (<em>Only</em> if {@link ERXKey#isToManyRelationship()}
+	 * returns <code>true</code>, which can only possibly happen if
+	 * {@link ERXKey#type()} has been set.)</li>
+	 * <li>{@link ERXArrayUtilities#distinct(Collection) remove} all duplicate
+	 * objects</li>
+	 * </ol>
+	 * 
+	 * @param <T>
+	 *            the Type of elements in the returned {@code NSArray}
+	 * @param erxKey
+	 * 
+	 * @return an {@code NSArray} of {@code T} objects.
+	 * 
+	 * @author David Avendasora
+	 */
+	public <T> NSArray<T> valueForKey(ERXKey<T> erxKey) {
+		return valueForKey(erxKey, true, true, true);
+	}
+
+	/**
+	 * A type-safe wrapper for {@link #valueForKeyPath(String)} that calls
+	 * {@code valueForKeyPath(erxKey.key())} and attempts to cast the result to
+	 * {@code NSArray<T>}.
+	 * <p>
+	 * Then, depending upon the parameters,
+	 * <ol>
+	 * <li>{@link ERXArrayUtilities#removeNullValues(NSArray) remove}
+	 * {@code NSKeyValueCoding.Null} elements</li>
+	 * <li>{@link ERXArrayUtilities#flatten(NSArray) flatten} all elements that
+	 * are arrays (<em>Only</em> if {@link ERXKey#isToManyRelationship()}
+	 * returns <code>true</code>, which can only possibly happen if
+	 * {@link ERXKey#type()} has been set.)</li>
+	 * <li>{@link ERXArrayUtilities#distinct(Collection) remove} all duplicate
+	 * objects</li>
+	 * </ol>
+	 * <p>
+	 * <b>If the value cannot be cast it will throw a {@link ClassCastException}
+	 * .</b>
+	 * 
+	 * @param <T>
+	 *            the Type of elements in the returned {@code NSArray}
+	 * @param erxKey
+	 * @param removeNulls
+	 *            if {@code true} all {@link NSKeyValueCoding.Null} elements
+	 *            will be {@link ERXArrayUtilities#removeNullValues(NSArray)
+	 *            removed}
+	 * @param distinct
+	 *            if {@code true} all duplicate elements will be
+	 *            {@link ERXArrayUtilities#distinct(NSArray) removed}
+	 * @param flatten
+	 *            if {@code true} all {@link NSArray} elements will be
+	 *            {@link ERXArrayUtilities#flatten(NSArray) flattened}
+	 * 
+	 * @return an {@code NSArray} of {@code T} objects.
+	 * 
+	 * @author David Avendasora
+	 */
+	public <T> NSArray<T> valueForKey(ERXKey<T> erxKey, boolean removeNulls, boolean distinct, boolean flatten) {
+		if (erxKey.type() == ERXKey.Type.Operator) {
+			final String message = "You cannot use an Operator (@sum, @max, etc.) ERXKey with valueForKey(ERXKey) " 
+								 + "because the value returned by valueForKey(opperator) cannot be cast to NSArray. " 
+								 + "Call valueForKey(MY_OPPERATOR_ERXKEY.key()) instead.";
+			throw new IllegalArgumentException(message);
+		}
+		NSArray<T> values = (NSArray<T>) valueForKeyPath(erxKey.key());
+		if (removeNulls) {
+			values = ERXArrayUtilities.removeNullValues(values);
+		}
+		if (flatten && erxKey.isToManyRelationship()) {
+			values = ERXArrayUtilities.flatten(values);
+		}
+		if (distinct) {
+			values = ERXArrayUtilities.distinct(values);
+		}
+		return values;
 	}
 }

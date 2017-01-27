@@ -11,6 +11,7 @@ import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSRange;
 
 import er.extensions.eof.ERXKey;
+import er.extensions.eof.qualifiers.ERXExistsQualifier;
 
 /**
  * Takes a qualifier, traverses every subqualifier, and prepends every keypath
@@ -60,19 +61,27 @@ public class ERXPrefixQualifierTraversal extends ERXQualifierTraversal {
 
 	@Override
 	protected boolean traverseOrQualifier(EOOrQualifier q) {
-		NSRange range = new NSRange(_qualifiers.count() - q.qualifiers().count(), q.qualifiers().count());
-		ERXOrQualifier oq = new ERXOrQualifier(_qualifiers.subarrayWithRange(range));
-		_qualifiers.removeObjectsInRange(range);
-		_qualifiers.addObject(oq);
+		if (q.qualifiers().isEmpty()) {
+			_qualifiers.addObject(new ERXOrQualifier());
+		} else {
+			NSRange range = new NSRange(_qualifiers.count() - q.qualifiers().count(), q.qualifiers().count());
+			ERXOrQualifier oq = new ERXOrQualifier(_qualifiers.subarrayWithRange(range));
+			_qualifiers.removeObjectsInRange(range);
+			_qualifiers.addObject(oq);
+		}
 		return true;
 	}
 
 	@Override
 	protected boolean traverseAndQualifier(EOAndQualifier q) {
-		NSRange range = new NSRange(_qualifiers.count() - q.qualifiers().count(), q.qualifiers().count());
-		ERXAndQualifier aq = new ERXAndQualifier(_qualifiers.subarrayWithRange(range));
-		_qualifiers.removeObjectsInRange(range);
-		_qualifiers.addObject(aq);
+		if (q.qualifiers().isEmpty()) {
+			_qualifiers.addObject(new ERXAndQualifier());
+		} else {
+			NSRange range = new NSRange(_qualifiers.count() - q.qualifiers().count(), q.qualifiers().count());
+			ERXAndQualifier aq = new ERXAndQualifier(_qualifiers.subarrayWithRange(range));
+			_qualifiers.removeObjectsInRange(range);
+			_qualifiers.addObject(aq);
+		}
 		return true;
 	}
 
@@ -103,11 +112,18 @@ public class ERXPrefixQualifierTraversal extends ERXQualifierTraversal {
 	}
 
 	@Override
+	protected boolean traverseExistsQualifier(ERXExistsQualifier q) {
+		String newBaseKeyPath = q.baseKeyPath() != null ? _prefix + q.baseKeyPath() : _prefix.substring(0, _prefix.length() - 1);
+		_qualifiers.add(new ERXExistsQualifier(q.subqualifier(), newBaseKeyPath, q.usesInQualInstead()));
+		return true;
+	}
+
+	@Override
 	public synchronized void traverse(EOQualifierEvaluation q, boolean postOrder) {
 		if (!postOrder) {
 			throw new IllegalArgumentException("ERXPrefixQualifierTraversal requires a postOrder traversal.");
 		}
-		_qualifiers = new NSMutableArray<EOQualifier>();
+		_qualifiers = new NSMutableArray<>();
 		super.traverse(q, postOrder);
 	}
 }

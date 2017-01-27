@@ -8,7 +8,8 @@ package er.extensions.eof;
 
 import java.util.Enumeration;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.webobjects.eoaccess.EOAttribute;
 import com.webobjects.eoaccess.EODatabaseContext;
@@ -32,33 +33,35 @@ import com.webobjects.foundation.NSMutableDictionary;
 import er.extensions.foundation.ERXPatcher;
 
 /**
- * <h4>Adds class-level inheritance to EOF.</h4>
- * <p>In Java, static methods are similar to class methods in Objective-C, but
+ * <h3>Adds class-level inheritance to EOF.</h3>
+ * In Java, static methods are similar to class methods in Objective-C, but
  * one cannot use static methods in interfaces and static methods cannot be overridden 
- * by a subclass. Using the clazz pattern removes those limitations.</p>
- * <p>Instead of using a static method, we can use a static inner class (a clazz) 
+ * by a subclass. Using the clazz pattern removes those limitations.
+ * <p>
+ * Instead of using a static method, we can use a static inner class (a clazz) 
  * instead. This allows for the methods on the clazz to be available statically to 
  * the class. The advantage is that static utility methods don't need to be 
  * generated for every subclass of an EOEnterpriseObject. It is generally sufficient to
- * simply use the utility methods available on the EOEnterpriseObjectClazz.</p>
- * <p>Every subclass of this class will get their own "ClazzObject" instance, so it's
+ * simply use the utility methods available on the EOEnterpriseObjectClazz.
+ * <p>
+ * Every subclass of this class will get their own "ClazzObject" instance, so it's
  * OK to store things which might be different in superclasses. That is, the "User"'s
  * implementation can override the "Person"'s and because Person.clazz() will get
- * it's own instance, it will do only "Person" things.</p>
- * <p>Use subclasses of EOEnterpriseObjectClazz as inner classes in your EO subclasses
+ * it's own instance, it will do only "Person" things.
+ * <p>
+ * Use subclasses of EOEnterpriseObjectClazz as inner classes in your EO subclasses
  * to work around the missing class object inheritance of java. They <b>must</b>
- * be named XX.XXClazz to work.</p>
- * <p>The methods from EOUtilities are mirrored here so you don't have to import EOAccess
+ * be named XX.XXClazz to work.
+ * <p>
+ * The methods from EOUtilities are mirrored here so you don't have to import EOAccess
  * in your subclasses, which is not legal for client-side classes. The implementation
  * for a client-side class could then be easily switched to use the server-side EOUtilites
- * implementation.</p>
- * @param <T> 
+ * implementation.
+ * 
+ * @param <T> eo class to represent
  */
 public class EOEnterpriseObjectClazz<T extends EOEnterpriseObject> {
-    /**
-     * logging support
-     */
-    public static final Logger log = Logger.getLogger(EOEnterpriseObjectClazz.class);
+    private static final Logger log = LoggerFactory.getLogger(EOEnterpriseObjectClazz.class);
     
     /**
      * caches the clazz objects
@@ -142,7 +145,7 @@ public class EOEnterpriseObjectClazz<T extends EOEnterpriseObject> {
 					EOQualifier q = new EOKeyValueQualifier("className", EOQualifier.QualifierOperatorEqual, className);
 					NSArray candidates = EOQualifier.filteredArrayWithQualifier(entities, q);
 					if(candidates.count() > 1) {
-						log.warn("More than one entity found: " + candidates);
+						log.warn("More than one entity found: {}", candidates);
 					}
 					EOEntity entity = (EOEntity) candidates.lastObject();
 					if(entity != null) {
@@ -163,7 +166,7 @@ public class EOEnterpriseObjectClazz<T extends EOEnterpriseObject> {
 
     /**
      * Constructor that also supplies an entity name.
-     * @param entityName
+     * @param entityName entity name
      */
     public EOEnterpriseObjectClazz(String entityName) {
     	setEntityName(entityName);
@@ -176,7 +179,7 @@ public class EOEnterpriseObjectClazz<T extends EOEnterpriseObject> {
      * without having to override the default constructor or the one 
      * that takes an entity name. Also useful when you don't have a special
      * clazz defined for your entity, but would rather take one from a superclass.
-     * @param entityName
+     * @param entityName entity name
      */
     public EOEnterpriseObjectClazz init(String entityName) {
     	setEntityName(entityName);
@@ -185,15 +188,17 @@ public class EOEnterpriseObjectClazz<T extends EOEnterpriseObject> {
 
     /**
      * Returns the class description for the entity.
+     * 
+     * @return class description
      */
-    
     public EOClassDescription classDescription() {
     	return entity().classDescriptionForInstances();
     }
 
     /**
      * Utility to return a new array datasource
-     * @param ec
+     * @param ec an editing context
+     * @return array datasource
      */
     public EOArrayDataSource newArrayDataSource(EOEditingContext ec) {
     	return new EOArrayDataSource(classDescription(), ec);
@@ -201,7 +206,8 @@ public class EOEnterpriseObjectClazz<T extends EOEnterpriseObject> {
     
     /**
      * Utility to return a new database datasource
-     * @param ec
+     * @param ec an editing context
+     * @return database datasource
      */
      public EODatabaseDataSource newDatabaseDataSource(EOEditingContext ec) {
     	return new EODatabaseDataSource(ec, entityName());
@@ -227,7 +233,7 @@ public class EOEnterpriseObjectClazz<T extends EOEnterpriseObject> {
             clazz.setEntityName(entityName);
         }
         if(log.isDebugEnabled()) {
-            log.debug("clazzForEntityNamed '" +entityName+ "': " + clazz.getClass().getName());
+            log.debug("clazzForEntityNamed '{}': {}", entityName, clazz.getClass());
         }
         return clazz;
     }
@@ -246,8 +252,8 @@ public class EOEnterpriseObjectClazz<T extends EOEnterpriseObject> {
     /**
      * Generates an array of primary key values for
      * the clazz's entity. Uses the database context
-     * for the entity's model and the given editingcontext.
-     * @param ec am editing context
+     * for the entity's model and the given editing context.
+     * @param ec an editing context
      * @param i number of primary keys to generate
      * @return array of new primary keys
      */
@@ -266,7 +272,7 @@ public class EOEnterpriseObjectClazz<T extends EOEnterpriseObject> {
      * Gets all of the objects for the clazz's entity.
      * Just a cover method for the {@link com.webobjects.eoaccess.EOUtilities EOUtilities}
      * method <code>objectsForEntityNamed</code>.
-     * @param ec editingcontext to fetch the objects into
+     * @param ec editing context to fetch the objects into
      * @return array of all the objects for a given entity name.
      */
     public NSArray<T> allObjects(EOEditingContext ec) {
@@ -381,7 +387,7 @@ public class EOEnterpriseObjectClazz<T extends EOEnterpriseObject> {
 
     /**
      * Fetches an array of objects for a given fetch specification
-     * and an array of bindings. The fetch specifiation is resolved
+     * and an array of bindings. The fetch specification is resolved
      * off of the entity corresponding to the current clazz.
      * @param ec editing content to fetch into
      * @param name fetch specification name
@@ -530,8 +536,8 @@ public class EOEnterpriseObjectClazz<T extends EOEnterpriseObject> {
     /**
      * Constructs a fetch specification that will only fetch the primary
      * keys for a given qualifier.
-     * @param ec editing context, not used
-     * @param eoqualifier to construct the fetch spec with
+     * 
+     * @param qualifier to construct the fetch spec with
      * @param sortOrderings array of sort orderings to sort the result 
      *     set with.
      * @param additionalKeys array of additional key paths to construct
@@ -539,13 +545,12 @@ public class EOEnterpriseObjectClazz<T extends EOEnterpriseObject> {
      * @return fetch specification that can be used to fetch primary keys for 
      *     a given qualifier and sort orderings.
      */
-    // FIXME: The ec parameter is not needed, nor used.
-    public EOFetchSpecification primaryKeyFetchSpecificationForEntity(EOEditingContext ec, EOQualifier eoqualifier, NSArray sortOrderings, NSArray additionalKeys) {
+    public EOFetchSpecification primaryKeyFetchSpecificationForEntity(EOQualifier qualifier, NSArray<EOSortOrdering> sortOrderings, NSArray<String> additionalKeys) {
         String entityName = entityName();
-        EOFetchSpecification fs = new EOFetchSpecification(entityName, eoqualifier, sortOrderings);
+        EOFetchSpecification fs = new EOFetchSpecification(entityName, qualifier, sortOrderings);
         fs.setFetchesRawRows(true);
-        EOEntity entity = entity(ec);
-        NSMutableArray keys = new NSMutableArray(entity.primaryKeyAttributeNames());
+        EOEntity entity = entity();
+        NSMutableArray<String> keys = new NSMutableArray<>(entity.primaryKeyAttributeNames());
         if(additionalKeys != null) {
             keys.addObjectsFromArray(additionalKeys);
         }
@@ -570,7 +575,7 @@ public class EOEnterpriseObjectClazz<T extends EOEnterpriseObject> {
      * @return array of primary keys matching a given qualifier
      */
     public NSArray primaryKeysMatchingQualifier(EOEditingContext ec, EOQualifier eoqualifier, NSArray sortOrderings) {
-        EOFetchSpecification fs = primaryKeyFetchSpecificationForEntity(ec, eoqualifier, sortOrderings, null);
+        EOFetchSpecification fs = primaryKeyFetchSpecificationForEntity(eoqualifier, sortOrderings, null);
         //NSArray nsarray = EOUtilities.rawRowsForQualifierFormat(ec, fs.qualifier(), );
         NSArray nsarray = ec.objectsWithFetchSpecification(fs);
         return nsarray;
@@ -682,7 +687,7 @@ public class EOEnterpriseObjectClazz<T extends EOEnterpriseObject> {
         /**
          * Creates a clazz object for a given entity.
          * Will look for a clazz object with the name:
-         * <entity name>$<entity name>Clazz.
+         * &lt;entity name&gt;$&lt;entity name&gt;Clazz.
          * @param entity to generate the clazz for
          * @return clazz object for the given entity
          */

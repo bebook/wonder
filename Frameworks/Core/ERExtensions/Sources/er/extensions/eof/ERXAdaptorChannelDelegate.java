@@ -2,7 +2,8 @@ package er.extensions.eof;
 
 import java.util.LinkedList;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.webobjects.eoaccess.EOAdaptorChannel;
 import com.webobjects.eoaccess.EODatabaseChannel;
@@ -23,16 +24,17 @@ import er.extensions.foundation.ERXRuntimeUtilities;
  * and the entity name matches the regular expression
  * <code>er.extensions.ERXSQLExpressionTracker.trace.entityMatchPattern</code>
  * then the SQL expression is logged together with the time used and the
- * parameters. <br />
+ * parameters.
+ * <p>
  * NOTE: To get patched into EOF, this class registers itself for the
  * <code>EODatabaseContext.DatabaseChannelNeededNotification</code>
  * notification and creates a new channel. If you would like to handle creation
  * of the channel yourself *and* you need the logging feature, you need to:
  * <ul>
  * <li>set the er.extensions.ERXAdaptorChannelDelegate.enabled=false in your
- * properties, which will prevent creation of the channel here
+ * properties, which will prevent creation of the channel here</li>
  * <li>create the channel yourself and set the delegate to
- * {@link new ERXAdaptorChannelDelegate()}
+ * <code>new ERXAdaptorChannelDelegate()</code></li>
  * </ul>
  * otherwise you just need to set
  * er.extensions.ERXAdaptorChannelDelegate.enabled=true
@@ -40,8 +42,7 @@ import er.extensions.foundation.ERXRuntimeUtilities;
  * @author ak
  */
 public class ERXAdaptorChannelDelegate {
-
-	private static Logger log = Logger.getLogger(ERXAdaptorChannelDelegate.class);
+	private static final Logger log = LoggerFactory.getLogger(ERXAdaptorChannelDelegate.class);
 
     private long _lastMilliseconds;
     
@@ -70,7 +71,7 @@ public class ERXAdaptorChannelDelegate {
 		if (collectLastStatements()) {
 			// this collects the last 10 statements executed for dumping them  
 			if (_lastStatements == null) {
-				_lastStatements = new LinkedList<String>();
+				_lastStatements = new LinkedList<>();
 			}
 			_lastStatements.addLast(ERXEOAccessUtilities.createLogString(channel, expression, System.currentTimeMillis() - _lastMilliseconds));
 			
@@ -124,7 +125,7 @@ public class ERXAdaptorChannelDelegate {
 		log.info("******* dumping collected SQL statements *******");
 		if (_lastStatements != null) {
 			for (int i = 0; i < _lastStatements.size(); i++) {
-				log.info(_lastStatements.get(i));
+				log.info("{}", _lastStatements.get(i));
 			}
 		}
 		else {
@@ -133,7 +134,7 @@ public class ERXAdaptorChannelDelegate {
 				log.info("You have to set the property 'er.extensions.ERXSQLExpressionTracker.collectLastStatements = true'. to make this feature work.");
 			}
 		}
-		_lastStatements = new LinkedList<String>();
+		_lastStatements = new LinkedList<>();
 		log.info("************************************************");
 	}
 	

@@ -16,18 +16,18 @@ import er.extensions.foundation.ERXKeyValuePair;
 import er.extensions.localization.ERXLocalizer;
 
 /**
- * <span class="en">
- * @d2wKey name
- * @d2wKey qualifierOperators
- * </span>
+ * <div class="en">
+ * </div>
  * 
- * <span class="ja">
+ * <div class="ja">
  * このプロパティ・レベル・コンポーネントは string のクエリをビルドします。
  * 例：("starts with" 又は "contains")
+ * </div>
  * 
- * @d2wKey name - テキストフィールドの name タグ
- * @d2wKey qualifierOperators - 指定 qualifier (NSArray<String>)
- * </span>
+ * @d2wKey name <div class="en"></div>
+ *              <div class="ja">テキストフィールドの name タグ</div>
+ * @d2wKey qualifierOperators <div class="en"></div>
+ *                            <div class="ja">指定 qualifier (NSArray&lt;String&gt;)</div>
  */
 public class ERD2WQueryStringOperator extends D2WQueryStringOperator {
 	/**
@@ -53,7 +53,7 @@ public class ERD2WQueryStringOperator extends D2WQueryStringOperator {
             if(value == null) {
                 value = currentOperatorString;
             }
-            result.addObject(new ERXKeyValuePair<String, String>(currentOperatorString, value));
+            result.addObject(new ERXKeyValuePair<>(currentOperatorString, value));
         }
         return result;
     }
@@ -78,7 +78,7 @@ public class ERD2WQueryStringOperator extends D2WQueryStringOperator {
         if(choice == null) {
             choice = value;
         }
-        return new ERXKeyValuePair<String, String>(value, choice);        
+        return new ERXKeyValuePair<>(value, choice);
     }
     
     public void  setSelectedElement(ERXKeyValuePair<String, String> newSelection) {
@@ -92,7 +92,7 @@ public class ERD2WQueryStringOperator extends D2WQueryStringOperator {
     }
     
     static {
-        _stringQualifierOperators = new NSArray<String>(new String[]{"starts with", "contains", "ends with", "is", "like"});
+        _stringQualifierOperators = new NSArray<>(new String[]{"starts with", "contains", "ends with", "is", "like"});
         _allQualifierOperators = _stringQualifierOperators.arrayByAddingObjectsFromArray(EOQualifier.relationalQualifierOperators());
     }
 }

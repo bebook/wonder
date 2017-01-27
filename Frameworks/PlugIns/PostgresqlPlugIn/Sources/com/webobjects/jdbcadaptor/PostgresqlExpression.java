@@ -108,7 +108,7 @@ public class PostgresqlExpression extends JDBCExpression {
     /**
      * Holds array of join clauses.
      */
-    private NSMutableArray<JoinClause> _alreadyJoined = new NSMutableArray<JoinClause>();
+    private NSMutableArray<JoinClause> _alreadyJoined = new NSMutableArray<>();
     
     /**
      * Fetch spec limit ivar
@@ -119,7 +119,7 @@ public class PostgresqlExpression extends JDBCExpression {
      * Fetch spec range ivar
      */
     private NSRange _fetchRange;
-    private final NSSelector<NSRange> _fetchRangeSelector = new NSSelector<NSRange>("fetchRange");
+    private final NSSelector<NSRange> _fetchRangeSelector = new NSSelector<>("fetchRange");
 
     private Boolean _enableIdentifierQuoting;
     
@@ -291,7 +291,7 @@ public class PostgresqlExpression extends JDBCExpression {
         jc.table2 = rightTable + " " + rightAlias;
         NSArray<EOJoin> joins = r.joins();
         int joinsCount = joins.count();
-        NSMutableArray<String> joinStrings = new NSMutableArray<String>(joinsCount);
+        NSMutableArray<String> joinStrings = new NSMutableArray<>(joinsCount);
         for( int i = 0; i < joinsCount; i++ ) {
             EOJoin currentJoin = joins.objectAtIndex(i);
             String left;
@@ -627,11 +627,11 @@ public class PostgresqlExpression extends JDBCExpression {
      */
     @Override
     public String joinClauseString() {
-        NSMutableDictionary<String, Boolean> seenIt = new NSMutableDictionary<String, Boolean>();
+        NSMutableDictionary<String, Boolean> seenIt = new NSMutableDictionary<>();
         StringBuilder sb = new StringBuilder();
         JoinClause jc;
         EOSortOrdering.sortArrayUsingKeyOrderArray
-            ( _alreadyJoined, new NSArray<EOSortOrdering>( EOSortOrdering.sortOrderingWithKey( "sortKey", EOSortOrdering.CompareCaseInsensitiveAscending ) ) );
+            ( _alreadyJoined, new NSArray<>( EOSortOrdering.sortOrderingWithKey( "sortKey", EOSortOrdering.CompareCaseInsensitiveAscending ) ) );
         if (_alreadyJoined.count() > 0) {
             jc = _alreadyJoined.objectAtIndex(0);
             
@@ -716,7 +716,7 @@ public class PostgresqlExpression extends JDBCExpression {
      */
 	private NSArray<String> quoteArrayContents(NSArray<String> a) {
     	Enumeration enumeration = a.objectEnumerator();
-    	NSMutableArray<String> result = new NSMutableArray<String>();
+    	NSMutableArray<String> result = new NSMutableArray<>();
     	while (enumeration.hasMoreElements()) {
     		String identifier = (String) enumeration.nextElement();
     		String quotedString = quoteIdentifier(identifier);
@@ -925,11 +925,12 @@ public class PostgresqlExpression extends JDBCExpression {
      * Overrides the parent implementation to:
      * <ul>
      * <li>add typecasts after the value, i.e. '2'::char,
-     * which is required with certain PostgreSQL versions (<=7.4.x) for the correct query processing, 
+     * which is required with certain PostgreSQL versions (&lt;=7.4.x) for the correct query processing, 
      * particularly with index usage. 
      * <li>quotes values if bind variables are disabled on this attribute. 
      * </ul>
-     * NULL values are excluded from casting. <br/>
+     * NULL values are excluded from casting.
+     * <p>
      * You can set the System default <code>com.webobjects.jdbcadaptor.PostgresqlExpression.disableTypeCasting</code>
      * to true to disable both fixes (the former you might want to disable when PG says it can't cast a certain value and
      * the second when you have values with a greater resolution already in the DB).
@@ -1066,6 +1067,7 @@ public class PostgresqlExpression extends JDBCExpression {
      * @param newString to be inserted
      * @param buffer string to have the replacement done on it
      * @return string after having all of the replacement done.
+     * @deprecated use {@link StringUtils#replace(String, String, String)} instead
      */
     public static String replaceStringByStringInString(String old, String newString, String buffer) {
         int begin, end;

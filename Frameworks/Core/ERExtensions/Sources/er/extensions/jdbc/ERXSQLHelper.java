@@ -17,8 +17,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.webobjects.eoaccess.EOAdaptor;
 import com.webobjects.eoaccess.EOAdaptorChannel;
@@ -89,10 +90,9 @@ public class ERXSQLHelper {
 		public static final int INET = 9001;
 	}
 	
-	/** logging support */
-	public static final Logger log = Logger.getLogger(ERXSQLHelper.class);
+	private static final Logger log = LoggerFactory.getLogger(ERXSQLHelper.class);
 
-	private static Map<String, ERXSQLHelper> _sqlHelperMap = new HashMap<String, ERXSQLHelper>();
+	private static Map<String, ERXSQLHelper> _sqlHelperMap = new HashMap<>();
 
 	public void prepareConnectionForSchemaChange(EOEditingContext ec, EOModel model) {
 		// do nothing by default
@@ -183,7 +183,7 @@ public class ERXSQLHelper {
 			// EODatabaseContext.registeredDatabaseContextForModel(model, ec);
 			if (entities == null) {
 				Enumeration<EOEntity> e = model.entities().objectEnumerator();
-				NSMutableArray<EOEntity> ar = new NSMutableArray<EOEntity>();
+				NSMutableArray<EOEntity> ar = new NSMutableArray<>();
 				while (e.hasMoreElements()) {
 					EOEntity currentEntity = e.nextElement();
 					if (ERXModelGroup.isPrototypeEntity(currentEntity)) {
@@ -230,7 +230,7 @@ public class ERXSQLHelper {
 	 * @return the sql script
 	 */
 	public String createDependentSchemaSQLForEntities(NSArray<EOEntity> entities, EOAdaptor adaptor) {
-		NSMutableDictionary<String, String> optionsCreateTables = new NSMutableDictionary<String, String>();
+		NSMutableDictionary<String, String> optionsCreateTables = new NSMutableDictionary<>();
 		optionsCreateTables.setObjectForKey("NO", EOSchemaGeneration.DropTablesKey);
 		optionsCreateTables.setObjectForKey("NO", EOSchemaGeneration.DropPrimaryKeySupportKey);
 		optionsCreateTables.setObjectForKey("YES", EOSchemaGeneration.CreateTablesKey);
@@ -256,7 +256,7 @@ public class ERXSQLHelper {
 			}
 		}
 		
-		NSMutableDictionary<String, String> optionsCreateForeignKeys = new NSMutableDictionary<String, String>();
+		NSMutableDictionary<String, String> optionsCreateForeignKeys = new NSMutableDictionary<>();
 		optionsCreateForeignKeys.setObjectForKey("NO", EOSchemaGeneration.DropTablesKey);
 		optionsCreateForeignKeys.setObjectForKey("NO", EOSchemaGeneration.DropPrimaryKeySupportKey);
 		optionsCreateForeignKeys.setObjectForKey("NO", EOSchemaGeneration.CreateTablesKey);
@@ -330,7 +330,9 @@ public class ERXSQLHelper {
 	 * @param create
 	 *            add create statements
 	 * @param drop
-	 *            add drop statements <br/><br/>This method uses the following
+	 *            add drop statements
+	 *            <p>
+	 *            This method uses the following
 	 *            defaults options:
 	 *            <ul>
 	 *            <li>EOSchemaGeneration.DropTablesKey=YES if drop</li>
@@ -343,14 +345,13 @@ public class ERXSQLHelper {
 	 *            <li>EOSchemaGeneration.CreateDatabaseKey=NO</li>
 	 *            <li>EOSchemaGeneration.DropDatabaseKey=NO</li>
 	 *            </ul>
-	 *            <br/><br>
 	 *            Possible values are <code>YES</code> and <code>NO</code>
 	 * 
 	 * @return a <code>String</code> containing SQL statements to create
 	 *         tables
 	 */
 	public NSMutableDictionary<String, String> defaultOptionDictionary(boolean create, boolean drop) {
-		NSMutableDictionary<String, String> optionsCreate = new NSMutableDictionary<String, String>();
+		NSMutableDictionary<String, String> optionsCreate = new NSMutableDictionary<>();
 		optionsCreate.setObjectForKey((drop) ? "YES" : "NO", EOSchemaGeneration.DropTablesKey);
 		optionsCreate.setObjectForKey((drop) ? "YES" : "NO", EOSchemaGeneration.DropPrimaryKeySupportKey);
 		optionsCreate.setObjectForKey((create) ? "YES" : "NO", EOSchemaGeneration.CreateTablesKey);
@@ -411,12 +412,12 @@ public class ERXSQLHelper {
 			}
 
 			NSDictionary<String, Object> d = entity.userInfo();
-			NSMutableArray<String> usedColumns = new NSMutableArray<String>();
+			NSMutableArray<String> usedColumns = new NSMutableArray<>();
 			for (Enumeration<String> keys = d.keyEnumerator(); keys.hasMoreElements();) {
 				String key = keys.nextElement();
 				if (key.startsWith("index")) {
 					String numbers = key.substring("index".length());
-					if (ERXStringUtilities.isDigitsOnly(numbers)) {
+					if (StringUtils.isNumeric(numbers)) {
 						String attributeNames = (String) d.objectForKey(key);
 						if (ERXStringUtilities.stringIsNullOrEmpty(attributeNames)) {
 							continue;
@@ -550,7 +551,7 @@ public class ERXSQLHelper {
 			attributes = entity.attributesToFetch();
 		}
 		else {
-			NSMutableArray<EOAttribute> rawRowAttributes = new NSMutableArray<EOAttribute>();
+			NSMutableArray<EOAttribute> rawRowAttributes = new NSMutableArray<>();
 			for (String rawRowKeyPath : fetchSpec.rawRowKeyPaths()) {
 				rawRowAttributes.addObject(entity.anyAttributeNamed(rawRowKeyPath));
 			}
@@ -819,7 +820,7 @@ public class ERXSQLHelper {
 	}
 
 	/**
-	 * Adds a " having count(*) > x" clause to a group by expression.
+	 * Adds a " having count(*) &gt; x" clause to a group by expression.
 	 * 
 	 * @param selector
 	 *            the comparison selector -- just like EOKeyValueQualifier
@@ -895,7 +896,7 @@ public class ERXSQLHelper {
 	 */
 	public String sqlForCreateUniqueIndex(String indexName, String tableName, ColumnIndex... columnIndexes) {
 		NSMutableArray<String> columnNames = columnNamesFromColumnIndexes(columnIndexes);
-		return "ALTER TABLE \"" + tableName + "\" ADD CONSTRAINT \"" + indexName + "\" UNIQUE(\"" + new NSArray<String>(columnNames).componentsJoinedByString("\", \"") + "\")";
+		return "ALTER TABLE \"" + tableName + "\" ADD CONSTRAINT \"" + indexName + "\" UNIQUE(\"" + new NSArray<>(columnNames).componentsJoinedByString("\", \"") + "\")";
 	}
 
 	/**
@@ -914,7 +915,7 @@ public class ERXSQLHelper {
 	}
 
 	protected ColumnIndex[] columnIndexesFromColumnNames(String... columnNames) {
-		NSMutableArray<ColumnIndex> columnIndexes = new NSMutableArray<ColumnIndex>();
+		NSMutableArray<ColumnIndex> columnIndexes = new NSMutableArray<>();
 		for (String columnName : columnNames) {
 			columnIndexes.addObject(new ColumnIndex(columnName));
 		}
@@ -1082,7 +1083,7 @@ public class ERXSQLHelper {
 			}
 		}
 		catch (Exception e) {
-			ERXSQLHelper.log.error("Failed to sneakily execute adaptor.typeInfo().", e);
+			log.error("Failed to sneakily execute adaptor.typeInfo().", e);
 		}
 
 		if (externalType == null) {
@@ -1106,7 +1107,7 @@ public class ERXSQLHelper {
 			}
 			else {
 				externalType = defaultJDBCTypes.objectAtIndex(0);
-				ERXSQLHelper.log.warn("There was more than one type that in your database that maps to JDBC Type #" + jdbcType + ": " + defaultJDBCTypes + ". We guessed '" + externalType + "'. Cross your fingers.");
+				log.warn("There was more than one type that in your database that maps to JDBC Type #{}: {}. We guessed '{}'. Cross your fingers.", jdbcType, defaultJDBCTypes, externalType);
 			}
 		}
 
@@ -1349,7 +1350,7 @@ public class ERXSQLHelper {
 	 * @return an array of sql statements
 	 */
 	public NSArray<String> splitSQLStatements(String sql) {
-		NSMutableArray<String> statements = new NSMutableArray<String>();
+		NSMutableArray<String> statements = new NSMutableArray<>();
 		if (sql != null) {
 			char commandSeparatorChar = commandSeparatorChar();
 			Pattern commentPattern = commentPattern();
@@ -1446,13 +1447,8 @@ public class ERXSQLHelper {
 	 *             if there is a problem reading the stream
 	 */
 	public NSArray<String> splitSQLStatementsFromFile(File f) throws IOException {
-		FileInputStream fis = new FileInputStream(f);
-		try {
-			BufferedInputStream bis = new BufferedInputStream(fis);
+		try (FileInputStream fis = new FileInputStream(f); BufferedInputStream bis = new BufferedInputStream(fis)){
 			return splitSQLStatementsFromInputStream(bis);
-		}
-		finally {
-			fis.close();
 		}
 	}
 
@@ -1697,19 +1693,19 @@ public class ERXSQLHelper {
 		/**
 		 * oracle 9 has a maximum length of 30 characters for table names,
 		 * column names and constraint names Foreign key constraint names are
-		 * defined like this from the plugin:<br/><br/>
+		 * defined like this from the plugin:
 		 * 
-		 * TABLENAME_FOEREIGNKEYNAME_FK <br/><br/>
+		 * <pre><code>TABLENAME_FOEREIGNKEYNAME_FK</code></pre>
 		 * 
-		 * The whole statement looks like this:<br/><br/>
+		 * The whole statement looks like this:
 		 * 
-		 * ALTER TABLE [TABLENAME] ADD CONSTRAINT [CONSTRAINTNAME] FOREIGN KEY
+		 * <pre><code>ALTER TABLE [TABLENAME] ADD CONSTRAINT [CONSTRAINTNAME] FOREIGN KEY
 		 * ([FK]) REFERENCES [DESTINATION_TABLE] ([PK]) DEFERRABLE INITIALLY
-		 * DEFERRED
+		 * DEFERRED</code></pre>
 		 * 
 		 * THIS means that the tablename and the columnname together cannot be
-		 * longer than 26 characters.<br/><br/>
-		 * 
+		 * longer than 26 characters.
+		 * <p>
 		 * This method checks each foreign key constraint name and if it is
 		 * longer than 30 characters its replaced with a unique name.
 		 * 
@@ -1827,7 +1823,7 @@ public class ERXSQLHelper {
 		
 		@Override
 		public String sqlForCreateUniqueIndex(String indexName, String tableName, ColumnIndex... columnIndexes) {
-			NSMutableArray<String> columnNames = new NSMutableArray<String>();
+			NSMutableArray<String> columnNames = new NSMutableArray<>();
 			for (ColumnIndex columnIndex : columnIndexes) {
 				columnNames.addObject(columnIndex.columnName());
 			}
@@ -1836,7 +1832,7 @@ public class ERXSQLHelper {
 		
 		@Override
 		public String sqlForCreateIndex(String indexName, String tableName, ColumnIndex... columnIndexes) {
-			NSMutableArray<String> columnNames = new NSMutableArray<String>();
+			NSMutableArray<String> columnNames = new NSMutableArray<>();
 			for (ColumnIndex columnIndex : columnIndexes) {
 				columnNames.addObject(columnIndex.columnName());
 			}
@@ -1907,13 +1903,13 @@ public class ERXSQLHelper {
 		@Override
 		public String sqlForCreateUniqueIndex(String indexName, String tableName, ColumnIndex... columnIndexes) {
 			NSMutableArray<String> columnNames = columnNamesFromColumnIndexes(columnIndexes);
-			return "ALTER TABLE " + tableName + " ADD CONSTRAINT \"" + indexName + "\" UNIQUE(" + new NSArray<String>(columnNames).componentsJoinedByString(", ") + ")";
+			return "ALTER TABLE " + tableName + " ADD CONSTRAINT \"" + indexName + "\" UNIQUE(" + new NSArray<>(columnNames).componentsJoinedByString(", ") + ")";
 		}
 		
 		@Override
 		public String sqlForCreateIndex(String indexName, String tableName, ColumnIndex... columnIndexes) {
 			NSMutableArray<String> columnNames = columnNamesFromColumnIndexes(columnIndexes);
-			return "CREATE INDEX \""+indexName+"\" ON "+tableName+" ("+new NSArray<String>(columnNames).componentsJoinedByString(", ")+")";
+			return "CREATE INDEX \""+indexName+"\" ON "+tableName+" ("+new NSArray<>(columnNames).componentsJoinedByString(", ")+")";
 		}
 
 		/**
@@ -1958,11 +1954,14 @@ public class ERXSQLHelper {
 
 		@Override
 		public String sqlForCreateUniqueIndex(String indexName, String tableName, ColumnIndex... columnIndexes) {
-			NSMutableArray<String> columnNames = new NSMutableArray<String>();
-			for (ColumnIndex columnIndex : columnIndexes) {
-				columnNames.addObject(columnIndex.columnName());
-			}
-			return "CREATE UNIQUE INDEX " + indexName + " ON " + tableName + "(" + columnNames.componentsJoinedByString(",") + ")";
+			NSArray<String> columnNames = columnNamesFromColumnIndexes(columnIndexes);
+			return "CREATE UNIQUE INDEX \""+indexName+"\" ON "+tableName+" (" + columnNames.componentsJoinedByString(",") + ")";
+		}
+		
+		@Override
+		public String sqlForCreateIndex(String indexName, String tableName, ColumnIndex... columnIndexes) {
+			NSArray<String> columnNames = columnNamesFromColumnIndexes(columnIndexes);
+			return "CREATE INDEX \""+indexName+"\" ON "+tableName+	" ("+columnNames.componentsJoinedByString(", ")+")";
 		}
 		
 		/**
@@ -2064,13 +2063,13 @@ public class ERXSQLHelper {
 		@Override
 		public String sqlForCreateUniqueIndex(String indexName, String tableName, ColumnIndex... columnIndexes) {
 			NSMutableArray<String> columnNames = columnNamesFromColumnIndexes(columnIndexes);
-			return "ALTER TABLE \"" + tableName + "\" ADD CONSTRAINT \"" + indexName + "\" UNIQUE(\"" + new NSArray<String>(columnNames).componentsJoinedByString("\", \"") + "\") DEFERRABLE INITIALLY DEFERRED";
+			return "ALTER TABLE \"" + tableName + "\" ADD CONSTRAINT \"" + indexName + "\" UNIQUE(\"" + new NSArray<>(columnNames).componentsJoinedByString("\", \"") + "\") DEFERRABLE INITIALLY DEFERRED";
 		}
 
 		@Override
 		public String sqlForCreateIndex(String indexName, String tableName, ColumnIndex... columnIndexes) {
 			NSMutableArray<String> columnNames = columnNamesFromColumnIndexes(columnIndexes);
-			return "CREATE INDEX \""+indexName+"\" ON \""+tableName+"\" (\""+new NSArray<String>(columnNames).componentsJoinedByString("\", \"")+"\")";
+			return "CREATE INDEX \""+indexName+"\" ON \""+tableName+"\" (\""+new NSArray<>(columnNames).componentsJoinedByString("\", \"")+"\")";
 		}
 
 		@Override
@@ -2150,14 +2149,14 @@ public class ERXSQLHelper {
 		}
 		
 		/**
-		 * FrontBase is exceedingly inefficient in processing OR clauses.   A query like this:<br/>
-		 * SELECT * FROM "Foo" t0 WHERE ( t0."oid" IN (431, 437, ...) OR t0."oid" IN (1479, 1480, 1481,...)...<br/>
-		 * Completely KILLS FrontBase (30+ seconds of 100%+ CPU usage). The same query rendered as:<br/>
-		 * SELECT * FROM "Foo" t0 WHERE t0."oid" IN (431, 437, ...) UNION SELECT * FROM "Foo" t0 WHERE t0."oid" IN (1479, 1480, 1481, ...)...
+		 * FrontBase is exceedingly inefficient in processing OR clauses.   A query like this:
+		 * <pre><code>SELECT * FROM "Foo" t0 WHERE ( t0."oid" IN (431, 437, ...) OR t0."oid" IN (1479, 1480, 1481,...)...</code></pre>
+		 * Completely KILLS FrontBase (30+ seconds of 100%+ CPU usage). The same query rendered as:
+		 * <pre><code>SELECT * FROM "Foo" t0 WHERE t0."oid" IN (431, 437, ...) UNION SELECT * FROM "Foo" t0 WHERE t0."oid" IN (1479, 1480, 1481, ...)...</code></pre>
 		 * executes in less than a tenth of the time with less high CPU load.  Collapse all the ORs and INs into one and it is faster
 		 * still.  This has been tested with over 17,000 elements, so 15,000 seemed like a safe maximum.  I don't know what the actual
 		 * theoretical maximum is.
-		 * 
+		 * <p>
 		 * But... It looks to like the query optimizer will choose to NOT use an index if the number of elements in the IN gets close to, 
 		 * or exceeds, the number of rows (as in the case of a select based on FK with a large number of keys that don't match any rows).  In 
 		 * this case it seems to fall back to table scanning (or something dreadfully slow).  This only seems to have an impact when the number
@@ -2189,6 +2188,9 @@ public class ERXSQLHelper {
 			String externalType;
 			if (jdbcType == Types.BOOLEAN) {
 				externalType = "boolean";
+			}
+			else if (jdbcType == Types.BINARY) {
+				externalType = "byte";
 			}
 			else {
 				externalType = super.externalTypeForJDBCType(adaptor, jdbcType);
@@ -2394,7 +2396,7 @@ public class ERXSQLHelper {
 		 */
 		@Override
 		public String sqlForCreateUniqueIndex(String indexName, String tableName, ColumnIndex... columnIndexes) {
-			NSMutableArray<String> columnNames = new NSMutableArray<String>();
+			NSMutableArray<String> columnNames = new NSMutableArray<>();
 			for (ColumnIndex columnIndex : columnIndexes) {
 				columnNames.addObject(columnIndex.columnName());
 			}
@@ -2404,7 +2406,7 @@ public class ERXSQLHelper {
 
 		@Override
 		public String sqlForCreateIndex(String indexName, String tableName, ColumnIndex... columnIndexes) {
-			NSMutableArray<String> columnNames = new NSMutableArray<String>();
+			NSMutableArray<String> columnNames = new NSMutableArray<>();
 			for (ColumnIndex columnIndex : columnIndexes) {
 				columnNames.addObject(columnIndex.columnName());
 			}
@@ -2444,7 +2446,7 @@ public class ERXSQLHelper {
 									databaseContext.rollbackChanges();
 									throw ex;
 								} catch (ParseException e) {
-									log.warn("Error parsing unique constraint exception message: " + message);
+									log.warn("Error parsing unique constraint exception message: {}", message, e);
 								}
 							}
 						}
@@ -2457,7 +2459,7 @@ public class ERXSQLHelper {
 		@Override
 		protected String sqlForCountDistinct(EOEntity entity) {
 			NSArray<String> primaryKeyAttributeNames = entity.primaryKeyAttributeNames();
-			NSMutableArray<String> pkColumnNames = new NSMutableArray<String>(primaryKeyAttributeNames.size());
+			NSMutableArray<String> pkColumnNames = new NSMutableArray<>(primaryKeyAttributeNames.size());
 
 			for (String pkAttributeName : primaryKeyAttributeNames) {
 				pkColumnNames.add(quoteColumnName("t0." + entity.attributeNamed(pkAttributeName).columnName()));
@@ -2523,7 +2525,7 @@ public class ERXSQLHelper {
 		 */
 		@Override
 		public String sqlForCreateUniqueIndex(String indexName, String tableName, ColumnIndex... columnIndexes) {
-			NSMutableArray<String> columnNames = new NSMutableArray<String>();
+			NSMutableArray<String> columnNames = new NSMutableArray<>();
 			for (ColumnIndex columnIndex : columnIndexes) {
 				columnNames.addObject(columnIndex.columnName());
 			}
@@ -2533,7 +2535,7 @@ public class ERXSQLHelper {
 
 		@Override
 		public String sqlForCreateIndex(String indexName, String tableName, ColumnIndex... columnIndexes) {
-			NSMutableArray<String> columnNames = new NSMutableArray<String>();
+			NSMutableArray<String> columnNames = new NSMutableArray<>();
 			for (ColumnIndex columnIndex : columnIndexes) {
 				columnNames.addObject(columnIndex.columnName());
 			}
@@ -2608,7 +2610,7 @@ public class ERXSQLHelper {
 		
 		@Override
 		public String sqlForCreateUniqueIndex(String indexName, String tableName, ColumnIndex... columnIndexes) {
-			NSMutableArray<String> columnNames = new NSMutableArray<String>();
+			NSMutableArray<String> columnNames = new NSMutableArray<>();
 			for (ColumnIndex columnIndex : columnIndexes) {
 				columnNames.addObject(columnIndex.columnName());
 			}
@@ -2617,7 +2619,7 @@ public class ERXSQLHelper {
 		
 		@Override
 		public String sqlForCreateIndex(String indexName, String tableName, ColumnIndex... columnIndexes) {
-			NSMutableArray<String> columnNames = new NSMutableArray<String>();
+			NSMutableArray<String> columnNames = new NSMutableArray<>();
 			for (ColumnIndex columnIndex : columnIndexes) {
 				columnNames.addObject(columnIndex.columnName());
 			}
@@ -2677,7 +2679,7 @@ public class ERXSQLHelper {
 
 		@Override
 		public String createIndexSQLForEntities(NSArray<EOEntity> entities, NSArray<String> externalTypesToIgnore) {
-			NSMutableArray<String> db2ExternalTypesToIgnore = new NSMutableArray<String>();
+			NSMutableArray<String> db2ExternalTypesToIgnore = new NSMutableArray<>();
 			if (externalTypesToIgnore != null) {
 				db2ExternalTypesToIgnore.addObjectsFromArray(externalTypesToIgnore);
 			}
@@ -2691,7 +2693,7 @@ public class ERXSQLHelper {
 		
 		@Override
 		public String sqlForCreateUniqueIndex(String indexName, String tableName, ColumnIndex... columnIndexes) {
-			NSMutableArray<String> columnNames = new NSMutableArray<String>();
+			NSMutableArray<String> columnNames = new NSMutableArray<>();
 			for (ColumnIndex columnIndex : columnIndexes) {
 				columnNames.addObject(columnIndex.columnName());
 			}
@@ -2700,7 +2702,7 @@ public class ERXSQLHelper {
 		
 		@Override
 		public String sqlForCreateIndex(String indexName, String tableName, ColumnIndex... columnIndexes) {
-			NSMutableArray<String> columnNames = new NSMutableArray<String>();
+			NSMutableArray<String> columnNames = new NSMutableArray<>();
 			for (ColumnIndex columnIndex : columnIndexes) {
 				columnNames.addObject(columnIndex.columnName());
 			}

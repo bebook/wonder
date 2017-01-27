@@ -88,7 +88,7 @@ public class ERXEOAccessUtilities {
     /** SQL logger */
     private static Logger sqlLoggingLogger = null;
 
-    private static final AtomicReference<IERXEOExecutionListener> listener = new AtomicReference<IERXEOExecutionListener>(new ERXEOExecutionListenerDumbImpl());
+    private static final AtomicReference<IERXEOExecutionListener> listener = new AtomicReference<>(new ERXEOExecutionListenerDumbImpl());
 
     public static void setListener(IERXEOExecutionListener aListener) {
         listener.set(aListener);
@@ -96,7 +96,7 @@ public class ERXEOAccessUtilities {
 
     /**
      * Finds an entity that is contained in a string. This is used a lot in
-     * DirectToWeb. Example: "ListAllStudios"=>Studio
+     * DirectToWeb. Example: "ListAllStudios" =&gt; Studio
      * 
      * @param ec
      *            editing context
@@ -110,7 +110,7 @@ public class ERXEOAccessUtilities {
             String lowerCaseName = string.toLowerCase();
             EOModelGroup group = modelGroup(ec);
             NSArray<String> entityNames = (NSArray<String>) ERXUtilities.entitiesForModelGroup(group).valueForKeyPath("name.toLowerCase");
-            NSMutableArray<String> possibleEntities = new NSMutableArray<String>();
+            NSMutableArray<String> possibleEntities = new NSMutableArray<>();
             for (String lowercaseEntityName : entityNames) {
                 if (lowerCaseName.indexOf(lowercaseEntityName) != -1) possibleEntities.addObject(lowercaseEntityName);
             }
@@ -685,19 +685,20 @@ public class ERXEOAccessUtilities {
 
     /** 
      * Oracle 9 has a maximum length of 30 characters for table names, column names and constraint names.
-     * Foreign key constraint names are defined like this from the plugin:<br/><br/>
-     * 
-     * TABLENAME_FOEREIGNKEYNAME_FK <br/><br/>
-     * 
-     * The whole statement looks like this:<br/><br/>
-     * 
+     * Foreign key constraint names are defined like this from the plugin:
+     * <p>
+     * TABLENAME_FOEREIGNKEYNAME_FK
+     * <p>
+     * The whole statement looks like this:
+     * <p>
      * ALTER TABLE [TABLENAME] ADD CONSTRAINT [CONSTRAINTNAME] FOREIGN KEY ([FK]) REFERENCES [DESTINATION_TABLE] ([PK]) DEFERRABLE INITIALLY DEFERRED
-     * 
+     * <p>
      * THIS means that the tablename and the columnname together cannot
-     * be longer than 26 characters.<br/><br/>
-     * 
+     * be longer than 26 characters.
+     * <p>
      * This method checks each foreign key constraint name and if it is longer than 30 characters it is replaced
      * with a unique name.
+     * 
      * @param entities
 	 *            a NSArray containing the entities for which create table
 	 *            statements should be generated or <code>null</code> if all entities in the
@@ -716,7 +717,7 @@ public class ERXEOAccessUtilities {
     }
     
     /**
-     * creates SQL to create tables for the specified Entities. This can be used
+     * Creates SQL to create tables for the specified Entities. This can be used
      * with EOUtilities rawRowsForSQL method to create the tables.
      * 
      * @param entities
@@ -736,9 +737,8 @@ public class ERXEOAccessUtilities {
      *            <li>EOSchemaGeneration.PrimaryKeyConstraintsKey</li>
      *            <li>EOSchemaGeneration.ForeignKeyConstraintsKey</li>
      *            <li>EOSchemaGeneration.CreateDatabaseKey</li>
-     *            </ul>
      *            <li>EOSchemaGeneration.DropDatabaseKey</li>
-     *            <br/><br>
+     *            </ul>
      *            Possible values are <code>YES</code> and <code>NO</code>
      * 
      * @return a <code>String</code> containing SQL statements to create
@@ -774,7 +774,7 @@ public class ERXEOAccessUtilities {
      *            statements should be generated or null if all entities in the
      *            model should be used.
      * @param modelName
-     *            the name of the EOModel <br/><br/>This method uses the
+     *            the name of the EOModel<p>This method uses the
      *            following defaults options:
      *            <ul>
      *            <li>EOSchemaGeneration.DropTablesKey=YES</li>
@@ -786,7 +786,6 @@ public class ERXEOAccessUtilities {
      *            <li>EOSchemaGeneration.CreateDatabaseKey=NO</li>
      *            <li>EOSchemaGeneration.DropDatabaseKey=NO</li>
      *            </ul>
-     *            <br/><br>
      *            Possible values are <code>YES</code> and <code>NO</code>
      * 
      * @return a <code>String</code> containing SQL statements to create
@@ -1020,7 +1019,7 @@ public class ERXEOAccessUtilities {
      * @return array of EOProperties that make up the given key path
      */
     public static NSArray<EOProperty> attributePathForKeyPath(EOEntity entity, String keyPath) {
-        NSMutableArray<EOProperty> result = new NSMutableArray<EOProperty>();
+        NSMutableArray<EOProperty> result = new NSMutableArray<>();
         String[] parts = keyPath.split("\\.");
         String part;
         for (int i = 0; i < parts.length - 1; i++) {
@@ -1386,7 +1385,7 @@ public class ERXEOAccessUtilities {
     public static EOQualifier qualifierFromAttributes(NSArray<EOAttribute> attributes, NSDictionary values) {
         EOQualifier result = null;
         if (attributes != null && attributes.count() > 0) {
-        	NSMutableArray<EOQualifier> qualifiers = new NSMutableArray<EOQualifier>();
+        	NSMutableArray<EOQualifier> qualifiers = new NSMutableArray<>();
             for (EOAttribute key : attributes) {
                 Object value = values.objectForKey(key.name());
                 qualifiers.addObject(new EOKeyValueQualifier(key.name(), EOQualifier.QualifierOperatorEqual, value));
@@ -1407,7 +1406,7 @@ public class ERXEOAccessUtilities {
      *      the given attribute as the source attribute.
      */
     public static NSArray<EORelationship> relationshipsForAttribute(EOEntity entity, EOAttribute attrib) {
-        NSMutableArray<EORelationship> arr = new NSMutableArray<EORelationship>();
+        NSMutableArray<EORelationship> arr = new NSMutableArray<>();
         for (EORelationship rel : entity.relationships()) {
             NSArray<EOAttribute> attribs = rel.sourceAttributes();
             if (attribs.containsObject(attrib)) {
@@ -1840,7 +1839,7 @@ public class ERXEOAccessUtilities {
 
 		if (relationship.isToMany()) {
 	 		if (skipFaultedRelationships) {
- 				NSMutableArray objectsWithUnfaultedRelationships = new NSMutableArray();
+ 				NSMutableArray<EOEnterpriseObject> objectsWithUnfaultedRelationships = new NSMutableArray<>();
  				String relationshipName = relationship.name();
  				Enumeration objectsEnum = objects.objectEnumerator();
  				while (objectsEnum.hasMoreElements()) {
@@ -1857,9 +1856,9 @@ public class ERXEOAccessUtilities {
 	 		}
 		}
 		else {
-			NSMutableSet<EOGlobalID> gids = new NSMutableSet<EOGlobalID>();
+			NSMutableSet<EOGlobalID> gids = new NSMutableSet<>();
 	 		
-			NSMutableArray objectsWithUnfaultedRelationships = new NSMutableArray();
+			NSMutableArray<EOEnterpriseObject> objectsWithUnfaultedRelationships = new NSMutableArray<>();
 			EOEntity destinationEntity = relationship.destinationEntity();
 			String relationshipName = relationship.name();
 			Enumeration objectsEnum = objects.objectEnumerator();
@@ -2333,14 +2332,17 @@ public class ERXEOAccessUtilities {
     }
 
 	/**
+	 * Utility method used to find all of the non-abstract sub entity names
+	 * for a given entity including itself.
 	 * @param ec editing context
-	 * @param rootEntityName
+	 * @param rootEntityName name of entity to walk all of the <code>subEntities</code>
+	 *            relationships
 	 * @return a list of all concrete entity names that inherit from
 	 *         rootEntityName, including rootEntityName itself if it is
 	 *         concrete.
 	 */
 	public static NSArray<String> entityHierarchyNamesForEntityNamed(EOEditingContext ec, String rootEntityName) {
-		NSMutableArray<String> names = new NSMutableArray<String>();
+		NSMutableArray<String> names = new NSMutableArray<>();
 		EOEntity rootEntity = entityNamed(ec, rootEntityName);
 		NSArray<EOEntity> entities = entityHierarchyForEntity(ec, rootEntity);
 	
@@ -2360,7 +2362,7 @@ public class ERXEOAccessUtilities {
 	 *         including rootEntity itself if it is concrete.
 	 */
 	public static NSArray<EOEntity> entityHierarchyForEntity(EOEditingContext ec, EOEntity rootEntity) {
-		NSMutableArray<EOEntity> entities = new NSMutableArray<EOEntity>();
+		NSMutableArray<EOEntity> entities = new NSMutableArray<>();
 	
 		if (!rootEntity.isAbstractEntity()) {
 			entities.add(rootEntity);
@@ -2384,7 +2386,7 @@ public class ERXEOAccessUtilities {
 	 * @return all of the sub-entities for a given entity.
 	 */
 	public static NSArray<EOEntity> allSubEntitiesForEntity(EOEntity rootEntity, boolean includeAbstracts) {
-		NSMutableArray<EOEntity> entities = new NSMutableArray<EOEntity>();
+		NSMutableArray<EOEntity> entities = new NSMutableArray<>();
 		if (rootEntity != null) {
 			for (EOEntity subEntity : rootEntity.subEntities()) {
 				if (!subEntity.isAbstractEntity() || includeAbstracts) {

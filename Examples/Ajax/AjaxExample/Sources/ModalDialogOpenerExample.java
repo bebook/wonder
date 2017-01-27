@@ -94,7 +94,7 @@ public class ModalDialogOpenerExample extends ModalDialogExample {
     	catch (Exception e)
     	{
     		validationMessage = e.getMessage();
-        	AjaxModalDialog.update(context());
+        	AjaxModalDialog.update(context(), "Edit");
     	}
     }
     
@@ -105,13 +105,13 @@ public class ModalDialogOpenerExample extends ModalDialogExample {
     		companyToEdit.editingContext().revert();
     		companyToEdit.editingContext().deleteObject(companyToEdit);
     		companyToEdit.editingContext().saveChanges();
-        	companies = new NSMutableArray<Company>(Company.fetchAllCompanies(ec, ERXS.ascs(Company.NAME_KEY)));
+        	companies = new NSMutableArray<>(Company.fetchAllCompanies(ec, ERXS.ascs(Company.NAME_KEY)));
         	AjaxModalDialog.close(context());
     	}
     	catch (Exception e)
     	{
     		validationMessage = e.getMessage();
-        	AjaxModalDialog.update(context());
+        	AjaxModalDialog.update(context(), "Edit");
     	}
     }
     

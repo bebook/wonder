@@ -35,8 +35,7 @@ import com.webobjects.foundation.NSMutableDictionary;
 // the right way to go is probably to use EOSwitchComponent
 /**
  * Rewrite of D2WSwitchComponent to not cache the D2WContext. Useful for nesting
- * configurations. <br />
- *  
+ * configurations.
  */
 
 public class ERD2WSwitchComponent extends D2WSwitchComponent {
@@ -50,7 +49,7 @@ public class ERD2WSwitchComponent extends D2WSwitchComponent {
     /** logging support */
     public static final Logger log = Logger.getLogger(ERD2WSwitchComponent.class);
     
-    protected transient NSMutableDictionary<String, Object> extraBindings = new NSMutableDictionary<String, Object>(16);
+    protected transient NSMutableDictionary<String, Object> extraBindings = new NSMutableDictionary<>(16);
 
     public ERD2WSwitchComponent(WOContext context) {
         super(context);
@@ -165,7 +164,7 @@ public class ERD2WSwitchComponent extends D2WSwitchComponent {
 	@Override
 	public NSDictionary extraBindings() {
 		if(extraBindings == null) {
-			extraBindings = new NSMutableDictionary<String, Object>(16);
+			extraBindings = new NSMutableDictionary<>(16);
 		}
 		
 		extraBindings.removeAllObjects();

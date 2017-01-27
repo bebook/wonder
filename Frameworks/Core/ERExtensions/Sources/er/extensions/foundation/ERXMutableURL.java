@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import org.apache.commons.lang.CharEncoding;
+import org.apache.commons.lang3.CharEncoding;
 
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
@@ -235,6 +235,15 @@ public class ERXMutableURL {
 	 * @return the port of this URL (can be null)
 	 */
 	public Integer port() {
+		if (_port == null) {
+			if (protocol() != null) {
+				if ("https".equals(protocol())) {
+					_port = 443;
+				} else {
+					_port = 80;
+				}
+			}
+		}
 		return _port;
 	}
 
@@ -258,7 +267,7 @@ public class ERXMutableURL {
 	}
 
 	/**
-	 * Replaces the query parameters of this URL with the given k=v&k2=v2 format
+	 * Replaces the query parameters of this URL with the given k=v&amp;k2=v2 format
 	 * string.
 	 * 
 	 * @param queryParameters
@@ -272,7 +281,7 @@ public class ERXMutableURL {
 	}
 	
 	/**
-	 * Appends the query parameters of this URL with the given k=v&k2=v2 format
+	 * Appends the query parameters of this URL with the given k=v&amp;k2=v2 format
 	 * string.
 	 * 
 	 * @param queryParameters
@@ -400,7 +409,7 @@ public class ERXMutableURL {
 	public synchronized void addQueryParameter(String key, String value) {
 		List<String> values = _queryParameters.get(key);
 		if (values == null) {
-			values = new LinkedList<String>();
+			values = new LinkedList<>();
 			_queryParameters.put(key, values);
 		}
 		if (value != null) {
@@ -461,7 +470,7 @@ public class ERXMutableURL {
 	 * @return the query parameters of this URL as a Map
 	 */
 	public synchronized Map<String, String> uniqueQueryParameters() {
-		Map<String, String> uniqueQueryParameters = new LinkedHashMap<String, String>();
+		Map<String, String> uniqueQueryParameters = new LinkedHashMap<>();
 		Iterator<Map.Entry<String, List<String>>> queryParameterIter = _queryParameters.entrySet().iterator();
 		while (queryParameterIter.hasNext()) {
 			Map.Entry<String, List<String>> queryParameter = queryParameterIter.next();
@@ -511,7 +520,7 @@ public class ERXMutableURL {
 	 *            the value to set it to
 	 */
 	public synchronized void setQueryParameter(String key, String value) {
-		LinkedList<String> queryParameters = new LinkedList<String>();
+		LinkedList<String> queryParameters = new LinkedList<>();
 		if (value != null) {
 			queryParameters.add(value);
 		}
@@ -565,7 +574,7 @@ public class ERXMutableURL {
 	}
 
 	/**
-	 * Returns the query parameters of this URL as a String (in x=y&a=b syntax).
+	 * Returns the query parameters of this URL as a String (in x=y&amp;a=b syntax).
 	 * 
 	 * @return the query parameters of this URL as a String
 	 */

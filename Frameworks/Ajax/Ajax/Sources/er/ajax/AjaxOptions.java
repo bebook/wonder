@@ -1,5 +1,6 @@
 package er.ajax;
 
+import java.io.IOException;
 import java.util.Enumeration;
 
 import com.webobjects.appserver.WOAssociation;
@@ -34,50 +35,49 @@ import com.webobjects.foundation.NSMutableDictionary;
  * <pre>
  *  AjaxOptions.appendToResponse(createAjaxOptions(), context.response(), context);
  * </pre>
- * </p>
  * 
  * <p>
  * Example (and fictitious) usage code:
- * <pre>
- * 	public NSDictionary createAjaxOptions(WOComponent component) {
- *		NSMutableArray<AjaxOption> ajaxOptionsArray = new NSMutableArray<AjaxOption>();
- *		ajaxOptionsArray.addObject(new AjaxOption("frequency", AjaxOption.NUMBER));
- *		ajaxOptionsArray.addObject(new AjaxOption("onLoading", AjaxOption.SCRIPT));
- *		ajaxOptionsArray.addObject(new AjaxOption("evalScripts", Boolean.TRUE, AjaxOption.BOOLEAN));
- *		ajaxOptionsArray.addObject(new AjaxOption("method", "get", AjaxOption.STRING));
- *      ...
- *		NSMutableDictionary<String, String> options = AjaxOption.createAjaxOptionsDictionary(ajaxOptionsArray, component, associations());
- *		return options;
- *	}
+ * <pre><code>
+ * public NSDictionary createAjaxOptions(WOComponent component) {
+ *     NSMutableArray&lt;AjaxOption&gt; ajaxOptionsArray = new NSMutableArray&lt;&gt;();
+ *     ajaxOptionsArray.addObject(new AjaxOption("frequency", AjaxOption.NUMBER));
+ *     ajaxOptionsArray.addObject(new AjaxOption("onLoading", AjaxOption.SCRIPT));
+ *     ajaxOptionsArray.addObject(new AjaxOption("evalScripts", Boolean.TRUE, AjaxOption.BOOLEAN));
+ *     ajaxOptionsArray.addObject(new AjaxOption("method", "get", AjaxOption.STRING));
+ *     ...
+ *     NSMutableDictionary&lt;String, String&gt; options = AjaxOption.createAjaxOptionsDictionary(ajaxOptionsArray, component, associations());
+ *     return options;
+ * }
  *
  * response.appendContentString("AUC.registerPeriodic('" + id + "'," + canStop + "," + stopped + ",");
  * AjaxOptions.appendToResponse(options, response, context);
  * response.appendContentString(");");
- * </pre>
+ * </code></pre>
  * 
  * @see AjaxOption
  * @see AjaxValue
  */
 public class AjaxOptions extends WODynamicElement {
-  private NSMutableDictionary _bindings;
+  private NSMutableDictionary<String, WOAssociation> _associations;
   private WOElement _children;
 
-  public AjaxOptions(String name, NSDictionary bindings, WOElement children) {
+  public AjaxOptions(String name, NSDictionary<String, WOAssociation> bindings, WOElement children) {
     super(name, bindings, children);
-    _bindings = bindings.mutableClone();
+    _associations = bindings.mutableClone();
     _children = children;
   }
 
   @Override
   public void appendToResponse(WOResponse response, WOContext context) {
     response.appendContentCharacter('{');
-    NSMutableDictionary options = _bindings;
-    WOAssociation optionsBinding = (WOAssociation) _bindings.objectForKey("options");
+    NSMutableDictionary options = _associations;
+    WOAssociation optionsBinding = _associations.objectForKey("options");
     if (optionsBinding != null) {
       NSDictionary passedInOptions = (NSDictionary) optionsBinding.valueInComponent(context.component());
       if (passedInOptions != null) {
         options = passedInOptions.mutableClone();
-        options.addEntriesFromDictionary(_bindings);
+        options.addEntriesFromDictionary(_associations);
       }
     }
     AjaxOptions._appendToResponse(options, response, context);
@@ -95,7 +95,7 @@ public class AjaxOptions extends WODynamicElement {
    * @param context WOContext to provide WOComponent to resolve binding values in
    */
   public static void _appendToResponse(NSDictionary options, WOResponse response, WOContext context) {
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     AjaxOptions._appendToBuffer(options, sb, context);
     response.appendContentString(sb.toString());
   }
@@ -104,10 +104,10 @@ public class AjaxOptions extends WODynamicElement {
    * Adds JSON formatted key-value pairs from options to end of response content.  Does not adds the surrounding "{" and "}" signifying a dictionary / object. 
    *
    * @param options dictionary of key-value pairs, intended to have come from AjaxOption
-   * @param stringBuffer StringBuffer to add JSON formatted key-value pairs to
+   * @param appendable appendable to add JSON formatted key-value pairs to
    * @param context WOContext to provide WOComponent to resolve binding values in
    */
-  public static void _appendToBuffer(NSDictionary options, StringBuffer stringBuffer, WOContext context) {
+  public static void _appendToBuffer(NSDictionary options, Appendable appendable, WOContext context) {
     if (options != null) {
       WOComponent component = context.component();
       boolean hasPreviousOptions = false;
@@ -122,13 +122,17 @@ public class AjaxOptions extends WODynamicElement {
             bindingValue = association.valueInComponent(component);
           }
           if (bindingValue != null) {
-            if (hasPreviousOptions) {
-              stringBuffer.append(", ");
+            try {
+              if (hasPreviousOptions) {
+                appendable.append(", ");
+              }
+              appendable.append(bindingName);
+              appendable.append(':');
+              appendable.append(bindingValue.toString());
+              hasPreviousOptions = true;
+            } catch (IOException e) {
+              // ignore
             }
-            stringBuffer.append(bindingName);
-            stringBuffer.append(':');
-            stringBuffer.append(bindingValue.toString());
-            hasPreviousOptions = true;
           }
         }
       }
@@ -139,13 +143,17 @@ public class AjaxOptions extends WODynamicElement {
    * Adds JSON formatted key-value pairs from options to end of response content.  Adds the surrounding "{" and "}" signifying a dictionary / object. 
    *
    * @param options dictionary of key-value pairs, intended to have come from AjaxOption
-   * @param stringBuffer StringBuffer to add JSON formatted key-value pairs to
+   * @param appendable appendable to add JSON formatted key-value pairs to
    * @param context WOContext to provide WOComponent to resolve binding values in
    */
-  public static void appendToBuffer(NSDictionary options, StringBuffer stringBuffer, WOContext context) {
-    stringBuffer.append('{');
-    AjaxOptions._appendToBuffer(options, stringBuffer, context);
-    stringBuffer.append('}');
+  public static void appendToBuffer(NSDictionary options, Appendable appendable, WOContext context) {
+    try {
+      appendable.append('{');
+      AjaxOptions._appendToBuffer(options, appendable, context);
+      appendable.append('}');
+    } catch (IOException e) {
+      // ignore
+    }
   }
 
   /**

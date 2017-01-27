@@ -20,7 +20,7 @@ public class ERXChainedQualifierUtils {
 	 * @return an ERXAndQualifier
 	 */
 	public static ERXAndQualifier and(EOQualifier originalQualifier, EOQualifier... qualifiers) {
-		NSMutableArray<EOQualifier> newQualifiers = new NSMutableArray<EOQualifier>();
+		NSMutableArray<EOQualifier> newQualifiers = new NSMutableArray<>();
 		if (originalQualifier != null) {
 			newQualifiers.addObject(originalQualifier);
 		}
@@ -30,19 +30,6 @@ public class ERXChainedQualifierUtils {
 			}
 		}
 		return new ERXAndQualifier(newQualifiers);
-	}
-
-	/**
-	 * Returns a new qualifier that represents the original qualifier not'd.
-	 * 
-	 * @param originalQualifier
-	 *            the qualifier to negate
-	 * @return an ERXNotQualifier
-	 * @deprecated use {@link er.extensions.eof.ERXQ#not(EOQualifier)} instead
-	 */
-	@Deprecated
-	public static ERXNotQualifier not(EOQualifier originalQualifier) {
-		return new ERXNotQualifier(originalQualifier);
 	}
 
 	/**
@@ -56,7 +43,7 @@ public class ERXChainedQualifierUtils {
 	 * @return an ERXOrQualifier
 	 */
 	public static ERXOrQualifier or(EOQualifier originalQualifier, EOQualifier... qualifiers) {
-		NSMutableArray<EOQualifier> newQualifiers = new NSMutableArray<EOQualifier>();
+		NSMutableArray<EOQualifier> newQualifiers = new NSMutableArray<>();
 		if (originalQualifier != null) {
 			newQualifiers.addObject(originalQualifier);
 		}

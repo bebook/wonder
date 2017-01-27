@@ -24,8 +24,10 @@ public class ERXD2WEditRelationship extends D2WEmbeddedComponent {
 	}
 	
 	public NSArray<Object> masterObjectAndRelationshipKey() {
-		return new NSArray<Object>(masterObject(), relationshipKey());
+		return new NSArray<>(masterObject(), relationshipKey());
 	}
+
+    public void setMasterObjectAndRelationshipKey(NSArray<Object> a) {}
 		
 	public EOEnterpriseObject masterObject() {
 		EOEnterpriseObject obj = (EOEnterpriseObject) valueForBinding("masterObject");

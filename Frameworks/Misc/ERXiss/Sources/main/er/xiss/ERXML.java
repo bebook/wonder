@@ -12,7 +12,7 @@ import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.apache.commons.lang.CharEncoding;
+import org.apache.commons.lang3.CharEncoding;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
@@ -156,7 +156,7 @@ public class ERXML {
   }
 
   /**
-   * Declaration represents an XML declaration (the &lt? ... ?&gt; part of the XML document).
+   * Declaration represents an XML declaration (the &lt;? ... ?&gt; part of the XML document).
    * 
    * @author mschrag
    */
@@ -255,7 +255,7 @@ public class ERXML {
      * Constructs a new Document.
      */
     public Doc() {
-      _children = new LinkedList<ERXML.Item>();
+      _children = new LinkedList<>();
       setDeclaration(new ERXML.Declaration("1.0", CharEncoding.UTF_8));
     }
 
@@ -751,7 +751,7 @@ public class ERXML {
      */
     public ERXML.E add(ERXML.Attr attribute) {
       if (_attributes == null) {
-        _attributes = new LinkedList<ERXML.Attr>();
+        _attributes = new LinkedList<>();
       }
       _attributes.add(attribute);
       return this;
@@ -1099,7 +1099,7 @@ public class ERXML {
      * list if there aren't any
      */
     public List<ERXML.E> children(String name) {
-      List<ERXML.E> children = new LinkedList<ERXML.E>();
+      List<ERXML.E> children = new LinkedList<>();
       if (_children != null) {
         for (ERXML.Node node : _children) {
           if (node instanceof ERXML.E && ((ERXML.E) node)._name.equals(name)) {
@@ -1121,7 +1121,7 @@ public class ERXML {
      */
     public Set<String> descendentsText(String name) {
       Set<ERXML.E> descendents = descendents(name);
-      Set<String> descendentsText = new LinkedHashSet<String>();
+      Set<String> descendentsText = new LinkedHashSet<>();
       for (ERXML.E descendent : descendents) {
         descendentsText.add(descendent.text());
       }
@@ -1138,7 +1138,7 @@ public class ERXML {
      * set if there aren't any
      */
     public Set<ERXML.E> descendents(final String name) {
-      final Set<ERXML.E> descendents = new LinkedHashSet<ERXML.E>();
+      final Set<ERXML.E> descendents = new LinkedHashSet<>();
       if (_children != null) {
         ERXML.Visitor visitor = new ERXML.Visitor() {
           public boolean visit(Item item) {
@@ -1237,7 +1237,7 @@ public class ERXML {
     public <T extends ERXML.Node> T add(T child) {
       child.setParent(this);
       if (_children == null) {
-        _children = new LinkedList<Node>();
+        _children = new LinkedList<>();
       }
       _children.add(child);
       return child;

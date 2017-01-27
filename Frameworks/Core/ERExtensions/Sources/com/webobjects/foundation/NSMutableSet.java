@@ -7,21 +7,21 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 /**
- * <span class="en">
+ * <div class="en">
  * NSSet reimplementation to support JDK 1.5 templates. Use with
- * </span>
+ * </div>
  * 
- * <span class="ja">
+ * <div class="ja">
  * JDK 1.5 テンプレートをサポートする為の再実装。使用は
- * </span>
+ * </div>
  * 
- * <pre>
+ * <pre>{@code
  * NSMutableSet<E> set = new NSMutableSet<E>();
  * set.put(new E())
  * 
  * for (E t : set)
  *     logger.debug(t);
- * </pre>
+ * }</pre>
  * 
  * @param <E> - type of set contents
  */
@@ -238,7 +238,7 @@ public class NSMutableSet<E> extends NSSet<E> {
 
 	@Override
 	public boolean retainAll(Collection<?> c) {
-		NSMutableSet<Object> s = new NSMutableSet<Object>();
+		NSMutableSet<Object> s = new NSMutableSet<>();
 		boolean updated = false;
 		for (Object o : c) {
 			s.add(o);
@@ -254,7 +254,7 @@ public class NSMutableSet<E> extends NSSet<E> {
 
 	@Override
 	public boolean removeAll(Collection<?> c) {
-		NSMutableSet<Object> s = new NSMutableSet<Object>();
+		NSMutableSet<Object> s = new NSMutableSet<>();
 		boolean updated = false;
 		for (Object o : c) {
 			s.add(o);

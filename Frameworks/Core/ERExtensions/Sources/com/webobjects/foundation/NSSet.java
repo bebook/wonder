@@ -13,19 +13,19 @@ import java.util.Iterator;
 import java.util.Set;
 
 /**
- * <span class="en">
+ * <div class="en">
  * NSSet reimplementation to support JDK 1.5 templates. Use with
- * </span>
+ * </div>
  * 
- * <span class="ja">
+ * <div class="ja">
  * JDK 1.5 テンプレートをサポートする為の再実装。使用は
- * </span>
+ * </div>
  * 
- * <pre>
+ * <pre>{@code
  * NSSet<E> setA = new NSSet<E>(NSArray<E> listA);
- * NSSet<E> setB = new NSSet<E>(NSArray<E> listB);
- * logger.debug("intersection contains " + setA.setByIntersectingSet(setB));
- * </pre>
+ *NSSet<E> setB = new NSSet<E>(NSArray<E> listB);
+ *logger.debug("intersection contains " + setA.setByIntersectingSet(setB));
+ * }</pre>
  * 
  * @param <E> - type of set contents
  */
@@ -116,6 +116,9 @@ public class NSSet<E> implements Cloneable, Serializable, NSCoding, _NSFoundatio
 	}
 
 	private NSSet(E[] objects, boolean checkForNull) {
+		if (objects == null) {
+			throw new IllegalArgumentException("Objects cannot be null.");
+		}
 		initFromObjects(objects, checkForNull);
 	}
 
@@ -303,7 +306,7 @@ public class NSSet<E> implements Cloneable, Serializable, NSCoding, _NSFoundatio
 
 	public HashSet<E> hashSet() {
 		E[] objects = (E[])objectsNoCopy();
-		HashSet<E> set = new HashSet<E>(objects.length);
+		HashSet<E> set = new HashSet<>(objects.length);
 		for (int i = 0; i < objects.length; i++) {
 			set.add(objects[i]);
 		}
@@ -425,17 +428,17 @@ public class NSSet<E> implements Cloneable, Serializable, NSCoding, _NSFoundatio
 		throw new UnsupportedOperationException("retainAll is not a supported operation in com.webobjects.foundation.NSSet");
 	}
 	public NSSet<E> setByIntersectingSet(NSSet<?> otherSet) {
-		NSMutableSet<E> set = new NSMutableSet<E>(this);
+		NSMutableSet<E> set = new NSMutableSet<>(this);
 		set.intersectSet(otherSet);
 		return set;
 	}
 	public NSSet<E> setBySubtractingSet(NSSet<?> otherSet) {
-		NSMutableSet<E> set = new NSMutableSet<E>(this);
+		NSMutableSet<E> set = new NSMutableSet<>(this);
 		set.subtractSet(otherSet);
 		return set;
 	}
 	public NSSet<E> setByUnioningSet(NSSet<? extends E> otherSet) {
-		NSMutableSet<E> set = new NSMutableSet<E>(this);
+		NSMutableSet<E> set = new NSMutableSet<>(this);
 		set.unionSet(otherSet);
 		return set;
 	}

@@ -25,7 +25,7 @@ public class ModalDialogExample extends WOComponent {
 	private Employee employee;
 	protected String errorMessages;
 	
-	public final NSArray<String> companyNames = new NSArray<String>(new String[]{
+	public final NSArray<String> companyNames = new NSArray<>(new String[]{
 			"Acme Ajax, Inc.",
 			"Betty's Baubles, LLC",
 			"Gimcrack, Intl.", 
@@ -33,7 +33,7 @@ public class ModalDialogExample extends WOComponent {
 			 "The Fu Bar"
 	});
 	
-	public NSMutableArray<Company> companies = new NSMutableArray<Company>();
+	public NSMutableArray<Company> companies = new NSMutableArray<>();
 
 	public ModalDialogExample(WOContext context) {
         super(context);
@@ -140,7 +140,7 @@ public class ModalDialogExample extends WOComponent {
         	if (e.additionalExceptions().count() > 0) {
         		errorMessages += "<br/>" + ((NSArray)e.additionalExceptions().valueForKey("localizedMessage")).componentsJoinedByString("<br/>");
         	}
-        	AjaxModalDialog.update(context());
+        	AjaxModalDialog.update(context(), "Edit");
     	}
     	
     	return null;

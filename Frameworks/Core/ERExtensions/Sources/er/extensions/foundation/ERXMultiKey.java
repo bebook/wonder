@@ -109,7 +109,7 @@ public class ERXMultiKey {
     
     /**
      * Method used to return the object array
-     * of keys for the current multi-key.<br />
+     * of keys for the current multi-key.<br>
      * DO NOT MODIFY!
      * @return object array of keys
      */  
@@ -182,7 +182,7 @@ public class ERXMultiKey {
      */
     @Override
     public String toString() {
-        StringBuilder result = new StringBuilder('(');
+        StringBuilder result = new StringBuilder("(");
         for (short i=0; i<_keys.length; i++) {
             Object o=_keys[i];
             result.append(o instanceof EOEntity ? ((EOEntity)o).name() : o != null ? o.toString() : "<NULL>");

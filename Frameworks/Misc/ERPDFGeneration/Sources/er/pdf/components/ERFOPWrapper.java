@@ -18,7 +18,7 @@ import er.pdf.ERPDFWrapper;
  * ERFOPWrapper will render the containing component content as a PDF document using
  * Apache FOP.
  * 
- * @binding xml2fopXsl the location of the xml->fo transform sheet (should be in the classpath)
+ * @binding xml2fopXsl the location of the xml-&gt;fo transform sheet (should be in the classpath)
  * @author lmg42
  */
 public class ERFOPWrapper extends ERPDFWrapper {
@@ -30,7 +30,7 @@ public class ERFOPWrapper extends ERPDFWrapper {
 	public NSData responseAsPdf(WOResponse response, WOContext context) {
 		WOComponent component = context.component();
 		
-		NSMutableDictionary<String, Object> config = new NSMutableDictionary<String, Object>();
+		NSMutableDictionary<String, Object> config = new NSMutableDictionary<>();
 	    for (Map.Entry<String, WOAssociation> entry : associations().entrySet()) {
 	      Object value = entry.getValue().valueInComponent(component);
 	      if (value != null) {

@@ -31,6 +31,7 @@ import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 
+import org.apache.commons.lang3.CharEncoding;
 import org.apache.sshd.SshServer;
 import org.apache.sshd.common.NamedFactory;
 import org.apache.sshd.server.Command;
@@ -344,7 +345,7 @@ public class Application extends ERXApplication  {
 				int intWotaskdJmxPort = Integer.parseInt(_jmxPort);
 				
 				// Set up the Password and Access file
-				HashMap<String, String> envPwd = new HashMap<String, String>();																
+				HashMap<String, String> envPwd = new HashMap<>();
 				envPwd.put("jmx.remote.x.password.file", _jmxPasswordFile);	
 				envPwd.put("jmx.remote.x.access.file", _jmxAccessFile);		
 				
@@ -541,10 +542,10 @@ public class Application extends ERXApplication  {
                 byte[] versionRequest;
                 byte[] versionReply;
                 try {
-                    multicastRequest = ("GET CONFIG-URL").getBytes("UTF-8");
-                    multicastReply = ("http://" +  myName + '\0').getBytes("UTF-8");
-                    versionRequest = ("womp://queryVersion").getBytes("UTF-8");
-                    versionReply = ("womp://replyVersion/" + myName + ":webObjects5.0" + '\0').getBytes("UTF-8");
+                    multicastRequest = ("GET CONFIG-URL").getBytes(CharEncoding.UTF_8);
+                    multicastReply = ("http://" +  myName + '\0').getBytes(CharEncoding.UTF_8);
+                    versionRequest = ("womp://queryVersion").getBytes(CharEncoding.UTF_8);
+                    versionReply = ("womp://replyVersion/" + myName + ":webObjects5.0" + '\0').getBytes(CharEncoding.UTF_8);
                 } catch (UnsupportedEncodingException uee) {
                     multicastRequest = ("GET CONFIG-URL").getBytes();
                     multicastReply = ("http://" +  myName + '\0').getBytes();

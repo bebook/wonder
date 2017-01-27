@@ -6,8 +6,8 @@ import java.security.ProtectionDomain;
 import java.util.HashMap;
 import java.util.Map;
 
-import javassist.gluonj.embedded.ClassPool;
-import javassist.gluonj.embedded.LoaderClassPath;
+import javassist.ClassPool;
+import javassist.LoaderClassPath;
 import javassist.gluonj.weave.Weaver;
 
 /**
@@ -22,8 +22,8 @@ import javassist.gluonj.weave.Weaver;
 public class ClassTransformer implements ClassFileTransformer {
   private final String glueName;
 
-  private Map<ClassLoader, ClassPool> knownClassLoaders = new HashMap<ClassLoader, ClassPool>();
-  private Map<ClassLoader, ClassFileTransformer> transformers = new HashMap<ClassLoader, ClassFileTransformer>();
+  private Map<ClassLoader, ClassPool> knownClassLoaders = new HashMap<>();
+  private Map<ClassLoader, ClassFileTransformer> transformers = new HashMap<>();
 
   public ClassTransformer(String glueName) {
     this.glueName = glueName;

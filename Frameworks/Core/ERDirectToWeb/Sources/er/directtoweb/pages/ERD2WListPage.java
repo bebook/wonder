@@ -11,8 +11,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Objects;
 
-import org.apache.commons.lang.ObjectUtils;
 import org.apache.log4j.Logger;
 
 import com.webobjects.appserver.WOActionResults;
@@ -156,6 +156,7 @@ public class ERD2WListPage extends ERD2WPage implements ERDListPageInterface, Se
 		boolean useBatchingDisplayGroup = useBatchingDisplayGroup();
 		if (useBatchingDisplayGroup) {
 			_displayGroup = new ERXBatchingDisplayGroup();
+            ((ERXBatchingDisplayGroup) _displayGroup).setShouldRememberRowCount(false);
 		} else {
 			_displayGroup = new ERXDisplayGroup();
 		}
@@ -183,7 +184,7 @@ public class ERD2WListPage extends ERD2WPage implements ERDListPageInterface, Se
 	 * display.
 	 */
 	public void editingContextDidSaveChanges(NSNotification notif) {
-	    if (ObjectUtils.equals(sessionID(), ERXSession.currentSessionID())) {
+	    if (Objects.equals(sessionID(), ERXSession.currentSessionID())) {
 	        _hasToUpdate = true;
 	    }
 	}
@@ -225,7 +226,7 @@ public class ERD2WListPage extends ERD2WPage implements ERDListPageInterface, Se
 
 	/** The number of objects in the list. */
 	public int listSize() {
-		return displayGroup().allObjects().count();
+		return displayGroup().displayedObjects().count();
 	}
 
 	/**
@@ -428,7 +429,7 @@ public class ERD2WListPage extends ERD2WPage implements ERDListPageInterface, Se
 		if (sortOrderings == null) {
 			NSArray<String> sortOrderingDefinition = (NSArray<String>) d2wContext().valueForKey("defaultSortOrdering");
 			if (sortOrderingDefinition != null) {
-				NSMutableArray<EOSortOrdering> validatedSortOrderings = new NSMutableArray<EOSortOrdering>();
+				NSMutableArray<EOSortOrdering> validatedSortOrderings = new NSMutableArray<>();
 				NSArray<String> displayPropertyKeys = (NSArray<String>) d2wContext().valueForKey("displayPropertyKeys");
 				for (int i = 0; i < sortOrderingDefinition.count();) {
 					String sortKey = sortOrderingDefinition.objectAtIndex(i++);
@@ -530,7 +531,7 @@ public class ERD2WListPage extends ERD2WPage implements ERDListPageInterface, Se
 			// sort order keys required it leads to a KVC error later on. We fix
 			// this here to re-init
 			// the sort ordering from the rules.
-			if (old != null && eodatasource != null && ObjectUtils.notEqual(eodatasource.classDescriptionForObjects(), old.classDescriptionForObjects())) {
+			if (old != null && eodatasource != null && !Objects.equals(eodatasource.classDescriptionForObjects(), old.classDescriptionForObjects())) {
 				setSortOrderingsOnDisplayGroup(sortOrderings(), displayGroup());
 			}
 		}
