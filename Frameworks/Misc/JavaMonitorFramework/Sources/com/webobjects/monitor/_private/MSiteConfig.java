@@ -1121,20 +1121,14 @@ public class MSiteConfig extends MObject {
             Integer Interval = anInst.lifebeatInterval();
             if (Interval != null) {
                 int interval = Interval.intValue();
-                //if (interval < smallestInterval) {
-                if (interval < smallestInterval || smallestInterval == 0) {
+                if (interval < smallestInterval) {
                     smallestInterval = interval;
                 }
             }
         }
-
         if (smallestInterval < 1) {
-            //return 300 * 1000;
-            String tmp = System.getProperties().getProperty("BKDefaultLifebeat");
-            return (tmp != null ? Integer.parseInt(tmp) : 30)* 1000;
+            return 30 * 1000;
         }
-        
-        System.err.println("bebook hard debug / autoRecoverInterval : " + smallestInterval);
         return smallestInterval * 1000;
     }
 
